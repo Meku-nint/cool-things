@@ -49,7 +49,7 @@ export default function SalesAnalyticsPage() {
   const averagePrice = items.length ? Math.round(items.reduce((s, i) => s + i.price, 0) / items.length) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
       <Navbar />
       
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
@@ -57,7 +57,7 @@ export default function SalesAnalyticsPage() {
         <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-blue-200">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-blue-100 to-blue-200">
                 <i className="fa-solid fa-chart-column text-blue-600 text-xl" />
               </div>
               <div>
@@ -142,7 +142,7 @@ export default function SalesAnalyticsPage() {
         {/* Performance Overview */}
         <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-purple-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-purple-100 to-purple-200">
               <i className="fa-solid fa-chart-line text-purple-600 text-lg" />
             </div>
             <div>
@@ -166,7 +166,7 @@ export default function SalesAnalyticsPage() {
                 </div>
                 <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000 ease-out"
+                    className="h-full bg-linear-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${conversionRate}%` }}
                   />
                 </div>
