@@ -52,13 +52,4 @@ Admins view the sales analytics dashboard to monitor performance.
 
 Installation
 # Clone the repository
-git clone https://github.com/yourusername/royal-smart-computer.git
-
-# Go to the project folder
-cd royal-smart-computer
-
-# Install dependencies
-npm install
-
-# Run the app
-npm run dev
+git clone https://github.com/Meku-nint/cool-things.git
