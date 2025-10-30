@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import Footer from "../components/Footer";
 
 type Computer = {
   id: string;
@@ -139,37 +140,43 @@ export default function DashboardPage() {
     <Navbar/>
       <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 flex-1 w-full">
         {/* Search + Filter */}
-        <section className="rounded-lg border bg-white p-4">
+        <section className="rounded-lg border bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-zinc-700">
+            <i className="fa-solid fa-magnifying-glass" />
+            <h2 className="text-base font-semibold">Search and Filter</h2>
+          </div>
           <div className="grid gap-3 md:grid-cols-4">
             <input
               placeholder="Search computers..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="col-span-2 rounded border px-3 py-2 outline-none focus:ring"
+              className="col-span-2 rounded border px-3 py-2 outline-none focus:ring shadow-sm"
             />
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as any)}
-              className="rounded border px-3 py-2"
+              className="rounded border px-3 py-2 shadow-sm"
             >
               <option value="all">All</option>
               <option value="sold">Sold</option>
               <option value="unsold">Unsold</option>
             </select>
-            <button className="rounded bg-black px-4 py-2 text-white hover:opacity-90">Search</button>
+            <button className="inline-flex items-center justify-center gap-2 rounded bg-black px-4 py-2 text-white hover:opacity-90 shadow">
+              <i className="fa-solid fa-magnifying-glass" /> Search
+            </button>
           </div>
         </section>
 
         {/* Analytics */}
-        <section className="rounded-lg border bg-white p-4">
+        <section className="rounded-lg border bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Sales Analytics</h2>
+            <h2 className="flex items-center gap-2 text-lg font-semibold"><i className="fa-solid fa-chart-column text-zinc-700"/> Sales Analytics</h2>
             <div className="flex gap-2">
               {(["week", "3days", "day"] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => setAnalyticsRange(r)}
-                  className={`rounded border px-3 py-1 text-sm ${analyticsRange === r ? "bg-black text-white" : "bg-white"}`}
+                  className={`rounded border px-3 py-1 text-sm shadow-sm ${analyticsRange === r ? "bg-black text-white" : "bg-white"}`}
                 >
                   {r === "week" ? "Week" : r === "3days" ? "3 Days" : "Today"}
                 </button>
@@ -177,13 +184,13 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded border p-4">
-              <div className="text-sm text-zinc-500">Sold Units</div>
+            <div className="rounded border p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-sm text-zinc-500"><i className="fa-solid fa-circle-check text-green-600"/> Sold Units</div>
               <div className="text-3xl font-bold">{soldCount}</div>
               <div className="text-xs text-zinc-500">in selected range</div>
             </div>
-            <div className="rounded border p-4">
-              <div className="text-sm text-zinc-500">Unsold Listings</div>
+            <div className="rounded border p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-sm text-zinc-500"><i className="fa-solid fa-box text-amber-600"/> Unsold Listings</div>
               <div className="text-3xl font-bold">{unsoldCount}</div>
               <div className="text-xs text-zinc-500">currently available</div>
             </div>
@@ -191,11 +198,11 @@ export default function DashboardPage() {
         </section>
 
         {/* Editable List */}
-        <section className="rounded-lg border bg-white p-4">
-          <h3 className="mb-3 text-lg font-semibold">Computers</h3>
+        <section className="rounded-lg border bg-white p-4 shadow-sm">
+          <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold"><i className="fa-solid fa-computer text-zinc-700"/> Computers</h3>
           <ul className="divide-y">
             {filtered.map((i) => (
-              <li key={i.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between">
+              <li key={i.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between hover:bg-zinc-50/60">
                 <div className="flex flex-1 flex-col gap-3 sm:flex-row">
                   <div className="flex items-start gap-2">
                     <div className="grid grid-cols-3 gap-2">
@@ -210,7 +217,7 @@ export default function DashboardPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="grid gap-1">
                       <label className="text-xs text-zinc-500">Name</label>
                       <input
@@ -225,7 +232,7 @@ export default function DashboardPage() {
                         type="number"
                         value={i.price}
                         onChange={(e) => updateItem(i.id, { price: Number(e.target.value) || 0 })}
-                        className="rounded border px-3 py-2"
+                        className="rounded border px-3 py-2 shadow-sm"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -235,7 +242,7 @@ export default function DashboardPage() {
                         checked={i.negotiable}
                         onChange={(e) => updateItem(i.id, { negotiable: e.target.checked })}
                       />
-                      <label htmlFor={`neg-${i.id}`} className="text-sm">Negotiable</label>
+                      <label htmlFor={`neg-${i.id}`} className="text-sm"><i className="fa-regular fa-handshake mr-1"/> Negotiable</label>
                     </div>
                     <div className="grid gap-1 sm:col-span-2">
                       <label className="text-xs text-zinc-500">Specifications</label>
@@ -257,13 +264,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`rounded px-2 py-1 text-xs ${i.sold ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                    {i.sold ? "Sold" : "Unsold"}
+                  <span className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs ${i.sold ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                    <i className={`fa-solid ${i.sold ? "fa-circle-check" : "fa-box"}`} /> {i.sold ? "Sold" : "Unsold"}
                   </span>
-                  <button className="rounded border px-3 py-2 text-sm hover:bg-zinc-50">Save</button>
                   {!i.sold && (
                     <button
-                      className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:opacity-90"
+                      className="inline-flex items-center gap-2 rounded bg-green-600 px-3 py-2 text-sm text-white hover:opacity-90 shadow"
                       onClick={() => {
                         setSellId(i.id);
                         setBuyerName("");
@@ -274,18 +280,18 @@ export default function DashboardPage() {
                         setWarrantyMonths(12);
                       }}
                     >
-                      Mark as Sold
+                      <i className="fa-solid fa-receipt"/> Mark as Sold
                     </button>
                   )}
                   <button
-                    className="rounded bg-red-600 px-3 py-2 text-sm text-white hover:opacity-90"
+                    className="inline-flex items-center gap-2 rounded bg-red-600 px-3 py-2 text-sm text-white hover:opacity-90 shadow"
                     onClick={() => {
                       if (confirm("Delete this device?")) {
                         setItems((prev) => prev.filter((x) => x.id !== i.id));
                       }
                     }}
                   >
-                    Delete
+                    <i className="fa-solid fa-trash"/> Delete
                   </button>
                 </div>
               </li>
@@ -296,13 +302,7 @@ export default function DashboardPage() {
         
       </main>
 
-      {/* Footer */}
-      <footer className="border-t bg-white">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 text-sm text-zinc-600">
-          <span>© {new Date().getFullYear()} Royal Smart Computer</span>
-          <span>Smart sales, warranties, and analytics</span>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Sell Modal */}
       {sellId && (

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 type Order = {
   id: string;
   buyerName: string;
@@ -23,8 +24,9 @@ export default function OrdersPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col">
       <Navbar/>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 flex-1">
       <h1 className="mb-4 text-2xl font-semibold">Orders</h1>
       {orders.length === 0 ? (
         <div className="rounded border bg-white p-4 text-sm text-zinc-500">No orders yet.</div>
@@ -62,6 +64,8 @@ export default function OrdersPage() {
           </table>
         </div>
       )}
+      </main>
+      <Footer/>
     </div>
   );
 }

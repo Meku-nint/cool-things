@@ -16,6 +16,7 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-6 text-sm">
           <Link href="/dashboard" className={isActive("/dashboard")}>Dashboard</Link>
+          <Link href="/sold" className={isActive("/sold")}>Sold</Link>
           <Link href="/orders" className={isActive("/orders")}>Orders</Link>
           <button
             className="text-zinc-600 hover:text-black"
