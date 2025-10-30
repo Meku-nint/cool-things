@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Footer from "../components/Footer";
+import Link from "next/link";
 
 type Computer = {
   id: string;
@@ -167,34 +168,20 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Analytics */}
+        {/* Analytics link */
+        }
         <section className="rounded-lg border bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-semibold"><i className="fa-solid fa-chart-column text-zinc-700"/> Sales Analytics</h2>
-            <div className="flex gap-2">
-              {(["week", "3days", "day"] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setAnalyticsRange(r)}
-                  className={`rounded border px-3 py-1 text-sm shadow-sm ${analyticsRange === r ? "bg-black text-white" : "bg-white"}`}
-                >
-                  {r === "week" ? "Week" : r === "3days" ? "3 Days" : "Today"}
-                </button>
-              ))}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <i className="fa-solid fa-chart-column text-zinc-700"/>
+              <h2 className="text-lg font-semibold">Sales Analytics</h2>
             </div>
+            <Link href="/analytics" className="inline-flex items-center gap-2 rounded bg-black px-3 py-2 text-sm text-white hover:opacity-90">
+              <i className="fa-solid fa-arrow-up-right-from-square"/>
+              <span>Open Analytics</span>
+            </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded border p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-sm text-zinc-500"><i className="fa-solid fa-circle-check text-green-600"/> Sold Units</div>
-              <div className="text-3xl font-bold">{soldCount}</div>
-              <div className="text-xs text-zinc-500">in selected range</div>
-            </div>
-            <div className="rounded border p-4 shadow-sm">
-              <div className="flex items-center gap-2 text-sm text-zinc-500"><i className="fa-solid fa-box text-amber-600"/> Unsold Listings</div>
-              <div className="text-3xl font-bold">{unsoldCount}</div>
-              <div className="text-xs text-zinc-500">currently available</div>
-            </div>
-          </div>
+          <p className="mt-2 text-sm text-zinc-600">View detailed charts, revenue, orders, and performance insights on the dedicated analytics page.</p>
         </section>
 
         {/* Editable List */}
