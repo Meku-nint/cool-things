@@ -191,12 +191,12 @@ export default function DashboardPage() {
                   className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 pr-11 text-slate-700 appearance-none transition-all duration-200 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-200 outline-none cursor-pointer"
                 >
                  <option value="all">All</option>
-<option value="hp">HP</option>
-<option value="dell">DELL</option>
-<option value="lenovo">Lenovo</option>
-<option value="asus">ASUS</option>
-<option value="acer">Acer</option>
-<option value="others">Others</option>
+                <option value="hp">HP</option>
+                <option value="dell">DELL</option>
+                <option value="lenovo">Lenovo</option>
+                <option value="asus">ASUS</option>
+                <option value="acer">Acer</option>
+                <option value="others">Others</option>
                 </select>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                   <i className="fa-solid fa-chevron-down text-sm" />

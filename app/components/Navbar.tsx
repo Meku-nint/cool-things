@@ -105,8 +105,6 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
       <div
         ref={mobileMenuRef}
         className={`md:hidden overflow-hidden transition-all duration-500 ease-out bg-white/95 backdrop-blur-xl border-t border-slate-200 ${
@@ -130,9 +128,7 @@ export default function Navbar() {
               <span className="font-medium">{item.label}</span>
             </Link>
           ))}
-          
-          {/* Upload in Mobile Menu */}
-          <button
+                    <button
             className={`inline-flex items-center gap-3 px-4 py-3 rounded-xl  transition-all duration-500 transform hover:cursor-pointer hover:bg-gray-100 ${
               isOpen 
                 ? 'translate-x-0 opacity-100' 
@@ -147,9 +143,7 @@ export default function Navbar() {
             <i className="fa-solid fa-cloud-arrow-up w-5 text-center" />
             <span className="font-medium">Upload</span>
           </button>
-          
-          {/* Logout in Mobile Menu */}
-          <button
+                    <button
             className={`inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-500 transform ${
               isOpen 
                 ? 'translate-x-0 opacity-100' 
@@ -166,8 +160,6 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-
-      {/* FontAwesome CSS */}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     </nav>
   );
