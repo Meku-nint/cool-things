@@ -147,13 +147,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
       <Navbar />
       
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
         <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm mb-6">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-slate-100 to-slate-200">
               <i className="fa-solid fa-magnifying-glass text-slate-600 text-lg" />
             </div>
             <div>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
         <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-slate-100 to-slate-200">
                 <i className="fa-solid fa-computer text-slate-600 text-lg" />
               </div>
               <div>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
             
             <button
               onClick={() => setUploadOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-2.5 text-white font-medium transition-all duration-300 hover:shadow-lg hover:scale-105"
+              className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-blue-500 to-purple-600 px-5 py-2.5 text-white font-medium transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
               <i className="fa-solid fa-plus" />
               Add Device
@@ -410,7 +410,7 @@ export default function DashboardPage() {
                         
                         {!item.sold && (
                           <button
-                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-green-500 to-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
                             onClick={() => {
                               setSellId(item.id);
                               setBuyerName("");
@@ -426,7 +426,7 @@ export default function DashboardPage() {
                           </button>
                         )}
                         <button
-                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
+                          className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-red-500 to-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
                           onClick={() => {
                             if (confirm("Are you sure you want to delete this device?")) {
                               setItems((prev) => prev.filter((x) => x.id !== item.id));
@@ -454,7 +454,7 @@ export default function DashboardPage() {
           <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-100 to-green-200">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-green-100 to-green-200">
                   <i className="fa-solid fa-receipt text-green-600 text-lg" />
                 </div>
                 <div>
@@ -534,7 +534,7 @@ export default function DashboardPage() {
                 Cancel
               </button>
               <button
-                className="rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
+                className="rounded-xl bg-linear-to-r from-green-500 to-emerald-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
                 onClick={() => {
                   if (!sellId) return;
                   const item = items.find((x) => x.id === sellId);
@@ -587,7 +587,7 @@ export default function DashboardPage() {
           <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-blue-200">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-100 to-blue-200">
                   <i className="fa-solid fa-plus text-blue-600 text-lg" />
                 </div>
                 <div>
@@ -686,7 +686,7 @@ export default function DashboardPage() {
                 Cancel
               </button>
               <button
-                className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
+                className="rounded-xl bg-linear-to-r from-blue-500 to-purple-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
                 onClick={() => {
                   if (!uName) return;
                   const newItem: Computer = {

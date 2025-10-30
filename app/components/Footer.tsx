@@ -3,17 +3,15 @@ import Link from "next/link";
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-700/50 text-slate-200">
+    <footer className="w-full bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-700/50 text-slate-200">
       <div className="mx-auto max-w-7xl px-6 py-12">
-        {/* Main Footer Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-          {/* Brand Section */}
           <div className="lg:col-span-5">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-white to-slate-200 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-linear-to-br from-white to-slate-200 flex items-center justify-center">
                 <span className="font-bold text-slate-900 text-sm">RSC</span>
               </div>
-              <h3 className="text-xl font-light bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              <h3 className="text-xl font-light bg-linear-to-r from-white to-slate-300 bg-clip-text text-transparent">
                 Royal Smart Computer
               </h3>
             </div>
@@ -26,8 +24,6 @@ export default function Footer() {
               <span className="text-sm">support@royalsmart.com</span>
             </div>
           </div>
-
-          {/* Links Grid */}
           <div className="lg:col-span-4 grid grid-cols-2 gap-8">
             <div>
               <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
@@ -79,17 +75,13 @@ export default function Footer() {
               </ul>
             </div>
           </div>
-
-          {/* Social & Newsletter */}
           <div className="lg:col-span-3">
             <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
               <i className="fa-solid fa-heart text-rose-400 text-xs" />
               Connect With Us
             </h4>
             <p className="text-slate-400 text-sm mb-4">Follow our journey and stay updated</p>
-            
-            {/* Social Icons */}
-            <div className="flex items-center gap-3 mb-6">
+                        <div className="flex items-center gap-3 mb-6">
               {[
                 { href: "https://linkedin.com", icon: "fa-brands fa-linkedin-in", color: "hover:text-blue-400" },
                 { href: "https://twitter.com", icon: "fa-brands fa-x-twitter", color: "hover:text-sky-400" },
@@ -108,22 +100,19 @@ export default function Footer() {
                 </a>
               ))}
             </div>
-
-            {/* Newsletter */}
             <div className="relative">
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="w-full rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all duration-300"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                 <i className="fa-solid fa-paper-plane text-xs" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="border-t border-slate-700/50 pt-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-slate-500 text-sm">
