@@ -20,7 +20,7 @@ export default function LoginPage() {
       const token = "demo-token";
       if (remember) localStorage.setItem("rsc_token", token);
       else sessionStorage.setItem("rsc_token", token);
-      router.push("/");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message ?? "Login failed");
     } finally {
