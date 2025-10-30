@@ -1,8 +1,9 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
+
+import Navbar from "../components/Navbar";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 type Computer = {
   id: string;
@@ -54,6 +55,7 @@ const initialItems: Computer[] = [
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "sold" | "unsold">("all");
   const [analyticsRange, setAnalyticsRange] = useState<"week" | "3days" | "day">("week");
@@ -79,7 +81,27 @@ export default function DashboardPage() {
   useEffect(() => {
     const token = localStorage.getItem("rsc_token") || sessionStorage.getItem("rsc_token");
     if (!token) router.replace("/login");
+    const savedItems = localStorage.getItem("rsc_items");
+    const savedOrders = localStorage.getItem("rsc_orders");
+    if (savedItems) {
+      try { setItems(JSON.parse(savedItems)); } catch {}
+    }
+    if (savedOrders) {
+      try { setOrders(JSON.parse(savedOrders)); } catch {}
+    }
   }, [router]);
+
+  useEffect(() => {
+    localStorage.setItem("rsc_items", JSON.stringify(items));
+  }, [items]);
+
+  useEffect(() => {
+    localStorage.setItem("rsc_orders", JSON.stringify(orders));
+  }, [orders]);
+
+  useEffect(() => {
+    if (searchParams.get("upload") === "1") setUploadOpen(true);
+  }, [searchParams]);
 
   const filtered = useMemo(() => {
     return items.filter((i) => {
@@ -114,21 +136,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded bg-black text-white flex items-center justify-center text-xs font-bold">RSC</div>
-            <span className="font-semibold">Royal Smart Computer</span>
-          </div>
-          <div className="flex items-center gap-6 text-sm">
-            <Link href="/dashboard" className="hover:text-black">Dashboard</Link>
-            <Link href="#orders" className="hover:text-black">Orders</Link>
-            <button onClick={() => setUploadOpen(true)} className="hover:text-black">Upload New Computers</button>
-          </div>
-        </div>
-      </nav>
-
+    <Navbar/>
       <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 flex-1 w-full">
         {/* Search + Filter */}
         <section className="rounded-lg border bg-white p-4">
@@ -269,44 +277,23 @@ export default function DashboardPage() {
                       Mark as Sold
                     </button>
                   )}
+                  <button
+                    className="rounded bg-red-600 px-3 py-2 text-sm text-white hover:opacity-90"
+                    onClick={() => {
+                      if (confirm("Delete this device?")) {
+                        setItems((prev) => prev.filter((x) => x.id !== i.id));
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </li>
             ))}
           </ul>
         </section>
 
-        {/* Orders Section */}
-        <section id="orders" className="rounded-lg border bg-white p-4">
-          <h3 className="mb-3 text-lg font-semibold">Client Orders</h3>
-          {orders.length === 0 ? (
-            <div className="text-sm text-zinc-500">No orders yet. Mark a computer as sold to create an order.</div>
-          ) : (
-            <ul className="divide-y">
-              {orders.map((o) => (
-                <li key={o.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="font-medium">{o.buyerName} <span className="text-zinc-500">({o.phone})</span></div>
-                    <div className="text-sm text-zinc-500">{o.model} — ${o.price.toFixed(2)} • Warranty: {o.warrantyMonths} months</div>
-                    {o.specs && <div className="text-xs text-zinc-500">Specs: {o.specs}</div>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded bg-green-100 px-2 py-1 text-xs text-green-700">Completed</span>
-                    {o.receiptUrl && (
-                      <a
-                        href={o.receiptUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded border px-2 py-1 text-xs hover:bg-zinc-50"
-                      >
-                        Receipt
-                      </a>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        
       </main>
 
       {/* Footer */}
