@@ -37,7 +37,7 @@ export default function SoldPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
       <Navbar />
       
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
@@ -45,7 +45,7 @@ export default function SoldPage() {
         <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-100 to-green-200">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-green-100 to-green-200">
                 <i className="fa-solid fa-circle-check text-green-600 text-xl" />
               </div>
               <div>
