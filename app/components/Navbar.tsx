@@ -79,13 +79,7 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-                    <button
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5  text-sm transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md"
-            onClick={() => router.push("/dashboard?upload=1")}
-          >
-            <i className="fa-solid fa-cloud-arrow-up" />
-            Upload
-          </button>
+                  
           <button
             className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2.5 text-red-600 text-sm hover:bg-red-100 transition-all duration-300 transform hover:scale-105"
             onClick={handleLogout}
@@ -128,21 +122,7 @@ export default function Navbar() {
               <span className="font-medium">{item.label}</span>
             </Link>
           ))}
-                    <button
-            className={`inline-flex items-center gap-3 px-4 py-3 rounded-xl  transition-all duration-500 transform hover:cursor-pointer hover:bg-gray-100 ${
-              isOpen 
-                ? 'translate-x-0 opacity-100' 
-                : 'translate-x-4 opacity-0'
-            }`}
-            style={{ transitionDelay: isOpen ? `${menuItems.length * 100}ms` : '0ms' }}
-            onClick={() => {
-              router.push("/dashboard?upload=1");
-              setIsOpen(false);
-            }}
-          >
-            <i className="fa-solid fa-cloud-arrow-up w-5 text-center" />
-            <span className="font-medium">Upload</span>
-          </button>
+                
                     <button
             className={`inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all duration-500 transform ${
               isOpen 
