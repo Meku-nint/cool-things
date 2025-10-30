@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import UploadComputer from "../components/UploadComputer";
 type Order = {
   id: string;
   buyerName: string;
@@ -35,6 +36,7 @@ export default function OrdersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-zinc-50 text-left">
+                <UploadComputer/>
                 <th className="px-3 py-2">Buyer</th>
                 <th className="px-3 py-2">Phone</th>
                 <th className="px-3 py-2">Model</th>
