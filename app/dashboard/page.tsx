@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Footer from "../components/Footer";
-import Link from "next/link";
 
 type Computer = {
   id: string;
@@ -14,7 +13,8 @@ type Computer = {
   negotiable: boolean;
   sold: boolean;
   specs?: string;
-  images: string[]; // up to 3
+  images: string[];
+  hasUnsavedChanges?: boolean;
 };
 
 type Order = {
@@ -60,10 +60,8 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | "sold" | "unsold">("all");
-  const [analyticsRange, setAnalyticsRange] = useState<"week" | "3days" | "day">("week");
   const [items, setItems] = useState<Computer[]>(initialItems);
   const [orders, setOrders] = useState<Order[]>([]);
-
   const [sellId, setSellId] = useState<string | null>(null);
   const [buyerName, setBuyerName] = useState("");
   const [phone, setPhone] = useState("");
@@ -71,14 +69,13 @@ export default function DashboardPage() {
   const [sellPrice, setSellPrice] = useState<number>(0);
   const [specs, setSpecs] = useState("");
   const [warrantyMonths, setWarrantyMonths] = useState<number>(12);
-
-  // Upload new computer modal state
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uName, setUName] = useState("");
   const [uPrice, setUPrice] = useState<number>(0);
   const [uNegotiable, setUNegotiable] = useState(true);
   const [uSpecs, setUSpecs] = useState("");
   const [uImages, setUImages] = useState<string[]>([]);
+  const [editingItem, setEditingItem] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("rsc_token") || sessionStorage.getItem("rsc_token");
@@ -113,11 +110,24 @@ export default function DashboardPage() {
     });
   }, [items, query, status]);
 
-  const soldCount = items.filter((i) => i.sold).length;
-  const unsoldCount = items.length - soldCount;
-
   function updateItem(id: string, patch: Partial<Computer>) {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+    setItems((prev) => prev.map((i) => 
+      i.id === id ? { ...i, ...patch, hasUnsavedChanges: true } : i
+    ));
+  }
+
+  function saveChanges(id: string) {
+    setItems((prev) => prev.map((i) => 
+      i.id === id ? { ...i, hasUnsavedChanges: false } : i
+    ));
+    setEditingItem(null);
+  }
+
+  function cancelChanges(id: string, originalItem: Computer) {
+    setItems((prev) => prev.map((i) => 
+      i.id === id ? { ...originalItem, hasUnsavedChanges: false } : i
+    ));
+    setEditingItem(null);
   }
 
   async function onImagesChange(id: string, files: FileList | null) {
@@ -137,221 +147,412 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 flex flex-col">
-    <Navbar/>
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 flex-1 w-full">
-        {/* Search + Filter */}
-        <section className="rounded-lg border bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center gap-2 text-zinc-700">
-            <i className="fa-solid fa-magnifying-glass" />
-            <h2 className="text-base font-semibold">Search and Filter</h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 flex flex-col">
+      <Navbar />
+      
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8">
+        <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm mb-6">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
+              <i className="fa-solid fa-magnifying-glass text-slate-600 text-lg" />
+            </div>
+            <div>
+              <h3 className="text-xl font-light text-slate-800">Search & Filter</h3>
+              <p className="text-sm text-slate-500">Find devices in your inventory</p>
+            </div>
           </div>
-          <div className="grid gap-3 md:grid-cols-4">
-            <input
-              placeholder="Search computers..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="col-span-2 rounded border px-3 py-2 outline-none focus:ring shadow-sm"
-            />
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              className="rounded border px-3 py-2 shadow-sm"
+
+          <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+            <div className="md:col-span-3">
+              <div className="relative">
+                <input
+                  placeholder="Search by device name or specs..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 pl-11 text-slate-700 transition-all duration-200 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-200 outline-none"
+                />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                  <i className="fa-solid fa-magnifying-glass" />
+                </div>
+              </div>
+               <div className="md:col-span-2">
+              <button className="w-full h-full inline-flex items-center justify-center gap-3 rounded-xl my-2 bg-slate-900 px-6 py-3 text-white font-medium transition-all duration-300 hover:shadow-lg hover:scale-105">
+                <i className="fa-solid fa-magnifying-glass" />
+                Search
+              </button>
+            </div>
+            </div>
+
+            <div className="md:col-span-3">
+              <div className="relative">
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as any)}
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 pr-11 text-slate-700 appearance-none transition-all duration-200 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-200 outline-none cursor-pointer"
+                >
+                 <option value="all">All</option>
+<option value="hp">HP</option>
+<option value="dell">DELL</option>
+<option value="lenovo">Lenovo</option>
+<option value="asus">ASUS</option>
+<option value="acer">Acer</option>
+<option value="others">Others</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                  <i className="fa-solid fa-chevron-down text-sm" />
+                </div>
+              </div>
+            </div>
+
+          
+          </div>
+        </section>
+
+        {/* Devices Section */}
+        <section className="rounded-2xl border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-sm">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200">
+                <i className="fa-solid fa-computer text-slate-600 text-lg" />
+              </div>
+              <div>
+                <h3 className="text-xl font-light text-slate-800">Uploaded Devices</h3>
+                <p className="text-sm text-slate-500">{filtered.length} devices found</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => setUploadOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-5 py-2.5 text-white font-medium transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
-              <option value="all">All</option>
-              <option value="sold">Sold</option>
-              <option value="unsold">Unsold</option>
-            </select>
-            <button className="inline-flex items-center justify-center gap-2 rounded bg-black px-4 py-2 text-white hover:opacity-90 shadow">
-              <i className="fa-solid fa-magnifying-glass" /> Search
+              <i className="fa-solid fa-plus" />
+              Add Device
             </button>
           </div>
-        </section>
 
-        {/* Analytics link */
-        }
-        <section className="rounded-lg border bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-chart-column text-zinc-700"/>
-              <h2 className="text-lg font-semibold">Sales Analytics</h2>
-            </div>
-            <Link href="/analytics" className="inline-flex items-center gap-2 rounded bg-black px-3 py-2 text-sm text-white hover:opacity-90">
-              <i className="fa-solid fa-arrow-up-right-from-square"/>
-              <span>Open Analytics</span>
-            </Link>
-          </div>
-          <p className="mt-2 text-sm text-zinc-600">View detailed charts, revenue, orders, and performance insights on the dedicated analytics page.</p>
-        </section>
-
-        {/* Editable List */}
-        <section className="rounded-lg border bg-white p-4 shadow-sm">
-          <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold"><i className="fa-solid fa-computer text-zinc-700"/> Computers</h3>
-          <ul className="divide-y">
-            {filtered.map((i) => (
-              <li key={i.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between hover:bg-zinc-50/60">
-                <div className="flex flex-1 flex-col gap-3 sm:flex-row">
-                  <div className="flex items-start gap-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      {i.images.length === 0 && (
-                        <div className="col-span-3 text-xs text-zinc-500">No images</div>
+          <div className="space-y-6">
+            {filtered.map((item) => (
+              <div
+                key={item.id}
+                className="group rounded-2xl border-2 border-slate-200 bg-white p-6 transition-all duration-300 hover:shadow-lg hover:border-slate-300"
+              >
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Images Section - Medium Size */}
+                  <div className="lg:w-1/3">
+                    <div className="mb-4 flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Device Images</span>
+                      {item.images.length === 0 && (
+                        <span className="text-xs text-slate-400">No images</span>
                       )}
-                      {i.images.slice(0, 3).map((src, idx) => (
-                        <div key={idx} className="relative h-20 w-28 overflow-hidden rounded border bg-zinc-50">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={src} alt={i.name} className="h-full w-full object-cover" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {item.images.slice(0, 3).map((src, idx) => (
+                        <div
+                          key={idx}
+                          className="relative h-32 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition-transform duration-300 group-hover:shadow-sm"
+                        >
+                          <img
+                            src={src}
+                            alt={item.name}
+                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                          />
                         </div>
                       ))}
+                      {item.images.length === 0 && (
+                        <div className="col-span-2 h-32 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/50 flex items-center justify-center">
+                          <i className="fa-regular fa-image text-slate-400 text-2xl" />
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="grid gap-1">
-                      <label className="text-xs text-zinc-500">Name</label>
-                      <input
-                        value={i.name}
-                        onChange={(e) => updateItem(i.id, { name: e.target.value })}
-                        className="rounded border px-3 py-2"
-                      />
-                    </div>
-                    <div className="grid gap-1">
-                      <label className="text-xs text-zinc-500">Price</label>
-                      <input
-                        type="number"
-                        value={i.price}
-                        onChange={(e) => updateItem(i.id, { price: Number(e.target.value) || 0 })}
-                        className="rounded border px-3 py-2 shadow-sm"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        id={`neg-${i.id}`}
-                        type="checkbox"
-                        checked={i.negotiable}
-                        onChange={(e) => updateItem(i.id, { negotiable: e.target.checked })}
-                      />
-                      <label htmlFor={`neg-${i.id}`} className="text-sm"><i className="fa-regular fa-handshake mr-1"/> Negotiable</label>
-                    </div>
-                    <div className="grid gap-1 sm:col-span-2">
-                      <label className="text-xs text-zinc-500">Specifications</label>
-                      <textarea
-                        className="min-h-20 rounded border px-3 py-2"
-                        value={i.specs || ""}
-                        onChange={(e) => updateItem(i.id, { specs: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-1">
-                      <label className="text-xs text-zinc-500">Update images (max 3)</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) => onImagesChange(i.id, e.target.files)}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs ${i.sold ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-                    <i className={`fa-solid ${i.sold ? "fa-circle-check" : "fa-box"}`} /> {i.sold ? "Sold" : "Unsold"}
-                  </span>
-                  {!i.sold && (
-                    <button
-                      className="inline-flex items-center gap-2 rounded bg-green-600 px-3 py-2 text-sm text-white hover:opacity-90 shadow"
-                      onClick={() => {
-                        setSellId(i.id);
-                        setBuyerName("");
-                        setPhone("");
-                        setModel(i.name);
-                        setSellPrice(i.price);
-                        setSpecs("");
-                        setWarrantyMonths(12);
-                      }}
-                    >
-                      <i className="fa-solid fa-receipt"/> Mark as Sold
-                    </button>
-                  )}
-                  <button
-                    className="inline-flex items-center gap-2 rounded bg-red-600 px-3 py-2 text-sm text-white hover:opacity-90 shadow"
-                    onClick={() => {
-                      if (confirm("Delete this device?")) {
-                        setItems((prev) => prev.filter((x) => x.id !== i.id));
-                      }
-                    }}
-                  >
-                    <i className="fa-solid fa-trash"/> Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
 
-        
+                  {/* Details Section */}
+                  <div className="lg:w-2/3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Device Name */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                          <i className="fa-regular fa-tag mr-1" />
+                          Device Name
+                        </label>
+                        <input
+                          value={item.name}
+                          onChange={(e) => updateItem(item.id, { name: e.target.value })}
+                          onFocus={() => setEditingItem(item.id)}
+                          className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                          placeholder="Enter device name"
+                        />
+                      </div>
+
+                      {/* Price */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                          <i className="fa-regular fa-dollar-sign mr-1" />
+                          Price ($)
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={item.price}
+                            onChange={(e) => updateItem(item.id, { price: Number(e.target.value) || 0 })}
+                            onFocus={() => setEditingItem(item.id)}
+                            className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 pr-12 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                            placeholder="0.00"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <i className="fa-solid fa-money-bill-wave" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Negotiable */}
+                      <div className="flex items-center gap-3 md:col-span-2">
+                        <div className="relative">
+                          <input
+                            id={`neg-${item.id}`}
+                            type="checkbox"
+                            checked={item.negotiable}
+                            onChange={(e) => {
+                              updateItem(item.id, { negotiable: e.target.checked });
+                              setEditingItem(item.id);
+                            }}
+                            className="peer hidden"
+                          />
+                          <label
+                            htmlFor={`neg-${item.id}`}
+                            className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-300 bg-slate-50/50 px-4 py-3 transition-all duration-200 peer-checked:border-blue-300 peer-checked:bg-blue-50/80 hover:bg-slate-100"
+                          >
+                            <div className="flex h-5 w-5 items-center justify-center rounded-lg border border-slate-400 bg-white transition-all duration-200 peer-checked:bg-blue-500 peer-checked:border-blue-500">
+                              <i className="fa-solid fa-check text-xs text-white opacity-0 transition-opacity duration-200 peer-checked:opacity-100" />
+                            </div>
+                            <span className="text-sm font-medium text-slate-700">
+                              <i className="fa-regular fa-handshake mr-2" />
+                              Price is negotiable
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Specifications */}
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                          <i className="fa-regular fa-file-lines mr-1" />
+                          Specifications
+                        </label>
+                        <textarea
+                          className="min-h-24 w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none resize-none"
+                          value={item.specs || ""}
+                          onChange={(e) => updateItem(item.id, { specs: e.target.value })}
+                          onFocus={() => setEditingItem(item.id)}
+                          placeholder="Enter device specifications..."
+                        />
+                      </div>
+
+                      {/* Image Upload */}
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                          <i className="fa-regular fa-images mr-1" />
+                          Update Images (Max 3)
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => onImagesChange(item.id, e.target.files)}
+                            className="w-full rounded-xl border border-slate-300 bg-slate-50/50 px-4 py-3 text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                            item.sold
+                              ? "bg-green-100/80 text-green-700 shadow-sm"
+                              : "bg-amber-100/80 text-amber-700 shadow-sm"
+                          }`}
+                        >
+                          <i className={`fa-solid ${item.sold ? "fa-circle-check" : "fa-box"} text-sm`} />
+                          {item.sold ? "Sold" : "Available"}
+                        </span>
+                        
+                        {item.hasUnsavedChanges && editingItem === item.id && (
+                          <span className="inline-flex items-center gap-2 rounded-2xl bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+                            <i className="fa-solid fa-pen-to-square" />
+                            Unsaved Changes
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {item.hasUnsavedChanges && editingItem === item.id && (
+                          <>
+                            <button
+                              className="inline-flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-all duration-300 hover:bg-slate-200 hover:scale-105"
+                              onClick={() => cancelChanges(item.id, initialItems.find(i => i.id === item.id) || item)}
+                            >
+                              <i className="fa-solid fa-xmark" />
+                              Cancel
+                            </button>
+                            <button
+                              className="inline-flex items-center gap-2 rounded-2xl bg-green-500 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-green-600 hover:scale-105"
+                              onClick={() => saveChanges(item.id)}
+                            >
+                              <i className="fa-solid fa-check" />
+                              Save Changes
+                            </button>
+                          </>
+                        )}
+                        
+                        {!item.sold && (
+                          <button
+                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
+                            onClick={() => {
+                              setSellId(item.id);
+                              setBuyerName("");
+                              setPhone("");
+                              setModel(item.name);
+                              setSellPrice(item.price);
+                              setSpecs(item.specs || "");
+                              setWarrantyMonths(12);
+                            }}
+                          >
+                            <i className="fa-solid fa-receipt" />
+                            Mark as Sold
+                          </button>
+                        )}
+                        <button
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105"
+                          onClick={() => {
+                            if (confirm("Are you sure you want to delete this device?")) {
+                              setItems((prev) => prev.filter((x) => x.id !== item.id));
+                            }
+                          }}
+                        >
+                          <i className="fa-solid fa-trash-can" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
 
       <Footer />
 
       {/* Sell Modal */}
       {sellId && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-lg border bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-lg font-semibold">Mark as Sold</h4>
-              <button className="text-zinc-500 hover:text-black" onClick={() => setSellId(null)}>✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-100 to-green-200">
+                  <i className="fa-solid fa-receipt text-green-600 text-lg" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-light text-slate-800">Mark as Sold</h4>
+                  <p className="text-sm text-slate-500">Complete the sale details</p>
+                </div>
+              </div>
+              <button 
+                className="text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                onClick={() => setSellId(null)}
+              >
+                <i className="fa-solid fa-xmark text-xl" />
+              </button>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Buyer Name</label>
-                <input className="rounded border px-3 py-2" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Buyer Name</label>
+                <input 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={buyerName} 
+                  onChange={(e) => setBuyerName(e.target.value)} 
+                />
               </div>
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Phone Number</label>
-                <input className="rounded border px-3 py-2" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Phone Number</label>
+                <input 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={phone} 
+                  onChange={(e) => setPhone(e.target.value)} 
+                />
               </div>
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Computer Model</label>
-                <input className="rounded border px-3 py-2" value={model} onChange={(e) => setModel(e.target.value)} />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Computer Model</label>
+                <input 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={model} 
+                  onChange={(e) => setModel(e.target.value)} 
+                />
               </div>
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Price</label>
-                <input type="number" className="rounded border px-3 py-2" value={sellPrice} onChange={(e) => setSellPrice(Number(e.target.value) || 0)} />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Sale Price ($)</label>
+                <input 
+                  type="number" 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={sellPrice} 
+                  onChange={(e) => setSellPrice(Number(e.target.value) || 0)} 
+                />
               </div>
-              <div className="grid gap-1 sm:col-span-2">
-                <label className="text-xs text-zinc-500">Specifications</label>
-                <textarea className="min-h-20 rounded border px-3 py-2" value={specs} onChange={(e) => setSpecs(e.target.value)} />
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700">Specifications</label>
+                <textarea 
+                  className="min-h-24 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none resize-none"
+                  value={specs} 
+                  onChange={(e) => setSpecs(e.target.value)} 
+                />
               </div>
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Warranty Time (months)</label>
-                <select className="rounded border px-3 py-2" value={warrantyMonths} onChange={(e) => setWarrantyMonths(Number(e.target.value))}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Warranty (months)</label>
+                <select 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={warrantyMonths} 
+                  onChange={(e) => setWarrantyMonths(Number(e.target.value))}
+                >
                   {[6, 12, 18, 24, 36].map((m) => (
-                    <option key={m} value={m}>{m}</option>
+                    <option key={m} value={m}>{m} months</option>
                   ))}
                 </select>
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="rounded border px-3 py-2 text-sm" onClick={() => setSellId(null)}>Cancel</button>
+            
+            <div className="flex justify-end gap-3">
+              <button 
+                className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-slate-700 font-medium transition-all duration-200 hover:bg-slate-50 hover:scale-105"
+                onClick={() => setSellId(null)}
+              >
+                Cancel
+              </button>
               <button
-                className="rounded bg-black px-4 py-2 text-sm text-white hover:opacity-90"
+                className="rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
                 onClick={() => {
                   if (!sellId) return;
                   const item = items.find((x) => x.id === sellId);
                   if (!item) return;
                   updateItem(sellId, { sold: true, price: sellPrice, name: model });
-                  // build simple HTML receipt and create blob URL
-                  const recHtml = `<!doctype html><html><head><meta charset=\"utf-8\"/><title>Receipt - Royal Smart Computer</title>
+                  const recHtml = `<!doctype html><html><head><meta charset="utf-8"/><title>Receipt - Royal Smart Computer</title>
                   <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px} h1{font-size:20px;margin:0 0 12px} .row{margin:4px 0} .muted{color:#6b7280} .box{border:1px solid #e5e7eb;padding:12px;border-radius:8px}</style>
                   </head><body>
                   <h1>Receipt</h1>
-                  <div class=\"muted\">Royal Smart Computer</div>
-                  <div class=\"row\">Date: ${new Date().toLocaleString()}</div>
-                  <div class=\"row\">Buyer: ${buyerName} (${phone})</div>
-                  <div class=\"row\">Model: ${model}</div>
-                  <div class=\"row\">Price: $${sellPrice.toFixed(2)}</div>
-                  <div class=\"row\">Warranty: ${warrantyMonths} months</div>
-                  ${specs ? `<div class=\"row box\"><strong>Specifications</strong><div class=\"muted\">${specs.replace(/</g, "&lt;")}</div></div>` : ""}
-                  <hr style=\"margin:16px 0\"/>
-                  <div class=\"muted\">Thank you for your purchase.</div>
+                  <div class="muted">Royal Smart Computer</div>
+                  <div class="row">Date: ${new Date().toLocaleString()}</div>
+                  <div class="row">Buyer: ${buyerName} (${phone})</div>
+                  <div class="row">Model: ${model}</div>
+                  <div class="row">Price: $${sellPrice.toFixed(2)}</div>
+                  <div class="row">Warranty: ${warrantyMonths} months</div>
+                  ${specs ? `<div class="row box"><strong>Specifications</strong><div class="muted">${specs.replace(/</g, "&lt;")}</div></div>` : ""}
+                  <hr style="margin:16px 0"/>
+                  <div class="muted">Thank you for your purchase.</div>
                   <script>window.onload=()=>{window.print&&window.print();}</script>
                   </body></html>`;
                   const blob = new Blob([recHtml], { type: "text/html" });
@@ -372,6 +573,7 @@ export default function DashboardPage() {
                   setSellId(null);
                 }}
               >
+                <i className="fa-solid fa-check mr-2" />
                 Confirm Sale
               </button>
             </div>
@@ -379,33 +581,69 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Upload New Computer Modal */}
+      {/* Upload Modal */}
       {uploadOpen && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-lg border bg-white p-4 shadow-lg">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="text-lg font-semibold">Upload New Computer</h4>
-              <button className="text-zinc-500 hover:text-black" onClick={() => setUploadOpen(false)}>✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-blue-200">
+                  <i className="fa-solid fa-plus text-blue-600 text-lg" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-light text-slate-800">Add New Device</h4>
+                  <p className="text-sm text-slate-500">Enter device details</p>
+                </div>
+              </div>
+              <button 
+                className="text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                onClick={() => setUploadOpen(false)}
+              >
+                <i className="fa-solid fa-xmark text-xl" />
+              </button>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Name</label>
-                <input className="rounded border px-3 py-2" value={uName} onChange={(e) => setUName(e.target.value)} />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Device Name</label>
+                <input 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={uName} 
+                  onChange={(e) => setUName(e.target.value)} 
+                />
               </div>
-              <div className="grid gap-1">
-                <label className="text-xs text-zinc-500">Price</label>
-                <input type="number" className="rounded border px-3 py-2" value={uPrice} onChange={(e) => setUPrice(Number(e.target.value) || 0)} />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Price ($)</label>
+                <input 
+                  type="number" 
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                  value={uPrice} 
+                  onChange={(e) => setUPrice(Number(e.target.value) || 0)} 
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <input id="u-neg" type="checkbox" checked={uNegotiable} onChange={(e) => setUNegotiable(e.target.checked)} />
-                <label htmlFor="u-neg" className="text-sm">Negotiable</label>
+              <div className="flex items-center gap-3 md:col-span-2">
+                <input 
+                  id="u-neg" 
+                  type="checkbox" 
+                  checked={uNegotiable} 
+                  onChange={(e) => setUNegotiable(e.target.checked)} 
+                  className="rounded border-slate-400 text-blue-600 focus:ring-blue-300"
+                />
+                <label htmlFor="u-neg" className="text-sm font-medium text-slate-700">
+                  <i className="fa-regular fa-handshake mr-2" />
+                  Price is negotiable
+                </label>
               </div>
-              <div className="grid gap-1 sm:col-span-2">
-                <label className="text-xs text-zinc-500">Specifications</label>
-                <textarea className="min-h-20 rounded border px-3 py-2" value={uSpecs} onChange={(e) => setUSpecs(e.target.value)} />
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700">Specifications</label>
+                <textarea 
+                  className="min-h-24 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none resize-none"
+                  value={uSpecs} 
+                  onChange={(e) => setUSpecs(e.target.value)} 
+                />
               </div>
-              <div className="grid gap-1 sm:col-span-2">
-                <label className="text-xs text-zinc-500">Images (max 3)</label>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-medium text-slate-700">Images (max 3)</label>
                 <input
                   type="file"
                   accept="image/*"
@@ -426,12 +664,12 @@ export default function DashboardPage() {
                     );
                     setUImages(previews);
                   }}
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
                 />
                 {uImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-3 mt-3">
                     {uImages.map((src, idx) => (
-                      <div key={idx} className="relative h-20 w-28 overflow-hidden rounded border bg-zinc-50">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <div key={idx} className="relative h-24 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
                         <img src={src} alt="preview" className="h-full w-full object-cover" />
                       </div>
                     ))}
@@ -439,10 +677,16 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="rounded border px-3 py-2 text-sm" onClick={() => setUploadOpen(false)}>Cancel</button>
+            
+            <div className="flex justify-end gap-3">
+              <button 
+                className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-slate-700 font-medium transition-all duration-200 hover:bg-slate-50 hover:scale-105"
+                onClick={() => setUploadOpen(false)}
+              >
+                Cancel
+              </button>
               <button
-                className="rounded bg-black px-4 py-2 text-sm text-white hover:opacity-90"
+                className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
                 onClick={() => {
                   if (!uName) return;
                   const newItem: Computer = {
@@ -455,7 +699,6 @@ export default function DashboardPage() {
                     images: uImages,
                   };
                   setItems((prev) => [newItem, ...prev]);
-                  // reset form
                   setUName("");
                   setUPrice(0);
                   setUNegotiable(true);
@@ -464,12 +707,14 @@ export default function DashboardPage() {
                   setUploadOpen(false);
                 }}
               >
-                Upload
+                <i className="fa-solid fa-plus mr-2" />
+                Add Device
               </button>
             </div>
           </div>
         </div>
       )}
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     </div>
   );
 }

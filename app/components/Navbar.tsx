@@ -54,23 +54,20 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className={`sticky top-0 z-50 border-b transition-all duration-500 ${
+    <nav className={`sticky top-0 z-50 border-b p-2 transition-all duration-500 ${
       isScrolled 
         ? "bg-white/95 backdrop-blur-xl shadow-lg border-slate-200/80" 
         : "bg-white/80 backdrop-blur-lg shadow-sm border-slate-200"
     }`}>
-      <div className="mx-auto max-w-6xl flex items-center justify-between px-4 h-16">
-        {/* Logo */}
+      <div className="mx-auto w-full  flex items-center justify-between px-4 h-16">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center font-semibold text-sm shadow-sm transition-transform duration-300 hover:scale-105">
+          <div className="h-8 w-8 rounded-xl bg-black  text-white flex items-center justify-center font-semibold text-sm shadow-sm transition-transform duration-300 hover:scale-105">
             <i className="fa-solid fa-desktop text-xs"></i>
           </div>
           <span className="font-light text-xl text-slate-900 tracking-tight transition-all duration-300">
             Royal Smart Computer
           </span>
         </div>
-
-        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-4 text-sm">
           {menuItems.map((item) => (
             <Link 
@@ -82,17 +79,13 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-          
-          {/* Upload Button */}
-          <button
+                    <button
             className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5  text-sm transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md"
             onClick={() => router.push("/dashboard?upload=1")}
           >
             <i className="fa-solid fa-cloud-arrow-up" />
             Upload
           </button>
-
-          {/* Logout Button */}
           <button
             className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-3 py-2.5 text-red-600 text-sm hover:bg-red-100 transition-all duration-300 transform hover:scale-105"
             onClick={handleLogout}
@@ -102,9 +95,7 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Hamburger */}
         <div className="md:hidden flex items-center">
-          {/* Hamburger Menu */}
           <button
             ref={hamburgerRef}
             className="flex items-center justify-center w-10 h-10 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-300 transform hover:scale-110"
