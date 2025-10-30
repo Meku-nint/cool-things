@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -27,69 +28,89 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-lg border bg-white p-6 shadow-sm">
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded bg-black text-white text-sm font-bold">
-            RSC
-          </div>
-          <h1 className="text-xl font-semibold">Royal Smart Computer</h1>
-          <p className="text-sm text-zinc-500">Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-10">
+
+          <h1 className="text-3xl font-light text-slate-800 tracking-tight">Royal Smart Computer</h1>
+          <p className="text-slate-500 mt-2 font-light">Sign in to your account</p>
         </div>
 
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <div className="grid gap-2">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border px-3 py-2 outline-none focus:ring"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <label htmlFor="password" className="text-sm font-medium">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border px-3 py-2 outline-none focus:ring"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm">
+        {/* Form Card */}
+        <div className="rounded-2xl bg-white/80 backdrop-blur-sm p-8 shadow-sm border border-slate-200/60">
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-normal text-slate-700 mb-2">
+                Email address
+              </label>
               <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                required
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 outline-none transition-all duration-200"
               />
-              Remember me
-            </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>
-          </div>
-
-          {error && (
-            <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded bg-black px-4 py-2 text-white hover:opacity-90 disabled:opacity-60"
-          >
-            {loading ? "Signing in..." : "Login"}
-          </button>
-        </form>
+            <div>
+              <label htmlFor="password" className="block text-sm font-normal text-slate-700 mb-2">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:ring-1 focus:ring-slate-300 outline-none transition-all duration-200"
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="rounded border-slate-400 text-slate-700 focus:ring-slate-300"
+                />
+                Remember me
+              </label>
+              <a href="#" className="text-slate-600 hover:text-slate-800 transition-colors duration-200 font-light">
+                Forgot password?
+              </a>
+            </div>
+
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 backdrop-blur-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-slate-900 py-3.5 text-white text-sm font-medium shadow-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:shadow-md"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+        </div>
+       
       </div>
     </div>
   );

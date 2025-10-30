@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+/// Stores information about uploaded computer posts
+model Computer {
+  id        String   @id @default(uuid())
+  name      String?  @db.VarChar(255)
+  fileName  String?  @db.VarChar(512)
+  count     Int
+  createdAt DateTime @default(now())
+}
