@@ -224,7 +224,7 @@ export default function DashboardPage() {
         const mapped: Computer = {
           id: created.id,
           name: created.pcName || uName,
-          price: Number(created.price) || uPrice || 0,
+          price: Number(created.price) || Number(uPrice) || 0,
           negotiable: uNegotiable,
           sold: false,
           specs: created.specifications || undefined,
@@ -247,7 +247,7 @@ export default function DashboardPage() {
         const newItem: Computer = {
           id: `${Date.now()}`,
           name: uName,
-          price: uPrice,
+          price: Number(uPrice) || 0,
           negotiable: uNegotiable,
           sold: false,
           specs: specsString,
@@ -271,7 +271,7 @@ export default function DashboardPage() {
       const newItem: Computer = {
         id: `${Date.now()}`,
         name: uName,
-        price: uPrice,
+        price: Number(uPrice) || 0,
         negotiable: uNegotiable,
         sold: false,
         specs: specsString,
