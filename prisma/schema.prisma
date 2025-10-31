@@ -22,3 +22,32 @@ model Computer {
   count     Int
   createdAt DateTime @default(now())
 }
+model Admin {
+  id       String @id @default(uuid())
+  name     String @db.VarChar(255)
+  password String @db.VarChar(255)
+  email    String @db.VarChar(255)
+}
+
+model Unsold {
+  id            String @id @default(uuid())
+  pcName        String @db.VarChar(255)
+  brand         String @db.VarChar(255)
+  price         String @db.VarChar(255)
+  specifications String @db.VarChar(255)
+  imagePath     String @db.VarChar(255)
+  createdAt     DateTime @default(now())
+}
+model Sold {
+  id              String   @id @default(uuid())
+  buyerName       String   @db.VarChar(255)
+  phoneNumber     String   @db.VarChar(20)
+  computerModel   String   @db.VarChar(255)
+  salesPrice      Int
+  specifications  String   @db.VarChar(255)
+  warranty        String   @db.VarChar(255)
+  createdAt       DateTime @default(now())
+}
+
+
+
