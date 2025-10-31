@@ -1,146 +1,191 @@
-import Link from "next/link";
+"use client";
+import { useState } from "react";
+
+type SocialLink = {
+  name: string;
+  icon: string;
+  url: string;
+  color: string;
+};
 
 export default function Footer() {
   const year = new Date().getFullYear();
-  return (
-    <footer className="w-full bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 border-t border-slate-700/50 text-slate-200">
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-          <div className="lg:col-span-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-linear-to-br from-white to-slate-200 flex items-center justify-center">
-                <span className="font-bold text-slate-900 text-sm">RSC</span>
-              </div>
-              <h3 className="text-xl font-light bg-linear-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                Royal Smart Computer
-              </h3>
-            </div>
-            <p className="text-slate-400 text-sm leading-relaxed max-w-md mb-4">
-              Empowering businesses with intelligent sales solutions, comprehensive warranties, 
-              and data-driven analytics. Streamlining operations for modern enterprises.
-            </p>
-            <div className="flex items-center gap-3 text-slate-500">
-              <i className="fa-solid fa-envelope text-sm" />
-              <span className="text-sm">support@royalsmart.com</span>
-            </div>
-          </div>
-          <div className="lg:col-span-4 grid grid-cols-2 gap-8">
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                <i className="fa-solid fa-cube text-blue-400 text-xs" />
-                Product
-              </h4>
-              <ul className="space-y-3">
-                {[
-                  { href: "/dashboard", label: "Dashboard", icon: "fa-gauge" },
-                  { href: "/analytics", label: "Analytics", icon: "fa-chart-column" },
-                  { href: "/orders", label: "Orders", icon: "fa-receipt" },
-                  { href: "/sold", label: "Sales", icon: "fa-circle-check" }
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link 
-                      href={item.href} 
-                      className="group flex items-center gap-2 text-slate-400 hover:text-white transition-all duration-300 text-sm"
-                    >
-                      <i className={`fa-solid ${item.icon} text-xs group-hover:scale-110 transition-transform duration-300`} />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+  const [isEditing, setIsEditing] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
+    {
+      name: "Telegram",
+      icon: "fa-brands fa-telegram",
+      url: "https://t.me/royalsmart",
+      color: "hover:text-blue-400"
+    },
+    {
+      name: "Phone",
+      icon: "fa-solid fa-phone",
+      url: "tel:+1234567890",
+      color: "hover:text-green-400"
+    },
+    {
+      name: "Email",
+      icon: "fa-solid fa-envelope",
+      url: "mailto:support@royalsmart.com",
+      color: "hover:text-red-400"
+    },
+    {
+      name: "TikTok",
+      icon: "fa-brands fa-tiktok",
+      url: "https://tiktok.com/@royalsmart",
+      color: "hover:text-pink-400"
+    },
+    {
+      name: "LinkedIn",
+      icon: "fa-brands fa-linkedin-in",
+      url: "https://linkedin.com/company/royalsmart",
+      color: "hover:text-blue-500"
+    },
+    {
+      name: "Instagram",
+      icon: "fa-brands fa-instagram",
+      url: "https://instagram.com/royalsmart",
+      color: "hover:text-purple-400"
+    }
+  ]);
 
-            <div>
-              <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                <i className="fa-solid fa-building text-green-400 text-xs" />
-                Company
-              </h4>
-              <ul className="space-y-3">
-                {[
-                  { href: "/about", label: "About Us", icon: "fa-users" },
-                  { href: "/contact", label: "Contact", icon: "fa-phone" },
-                  { href: "/privacy", label: "Privacy", icon: "fa-shield" },
-                  { href: "/terms", label: "Terms", icon: "fa-file-contract" }
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link 
-                      href={item.href} 
-                      className="group flex items-center gap-2 text-slate-400 hover:text-white transition-all duration-300 text-sm"
-                    >
-                      <i className={`fa-solid ${item.icon} text-xs group-hover:scale-110 transition-transform duration-300`} />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+  const [tempLinks, setTempLinks] = useState(socialLinks);
+
+  const handleSave = () => {
+    setSocialLinks(tempLinks);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setTempLinks(socialLinks);
+    setIsEditing(false);
+  };
+
+  const updateLink = (index: number, field: keyof SocialLink, value: string) => {
+    const updated = [...tempLinks];
+    updated[index] = { ...updated[index], [field]: value };
+    setTempLinks(updated);
+  };
+
+  return (
+    <footer className="w-full bg-linear-to-br from-slate-900 to-slate-800 border-t border-slate-700/50 text-slate-200">
+      <div className="mx-auto max-w-4xl px-6 py-12">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-12 w-12 rounded-xl bg-linear-to-br from-white to-slate-200 flex items-center justify-center">
+              <span className="font-bold text-slate-900 text-sm">RSC</span>
             </div>
+            <h3 className="text-2xl font-light bg-linear-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              Royal Smart Computer
+            </h3>
           </div>
-          <div className="lg:col-span-3">
-            <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-              <i className="fa-solid fa-heart text-rose-400 text-xs" />
-              Connect With Us
-            </h4>
-            <p className="text-slate-400 text-sm mb-4">Follow our journey and stay updated</p>
-                        <div className="flex items-center gap-3 mb-6">
-              {[
-                { href: "https://linkedin.com", icon: "fa-brands fa-linkedin-in", color: "hover:text-blue-400" },
-                { href: "https://twitter.com", icon: "fa-brands fa-x-twitter", color: "hover:text-sky-400" },
-                { href: "https://facebook.com", icon: "fa-brands fa-facebook-f", color: "hover:text-blue-500" },
-                { href: "https://instagram.com", icon: "fa-brands fa-instagram", color: "hover:text-rose-400" },
-                { href: "https://tiktok.com", icon: "fa-brands fa-tiktok", color: "hover:text-pink-400" }
-              ].map((social, index) => (
+          <p className="text-slate-400 text-sm max-w-md mx-auto">
+            Connect with us through your preferred platform
+          </p>
+        </div>
+
+        {/* Social Links Grid */}
+        <div className="mb-8">
+          {isEditing ? (
+            // Edit Mode
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tempLinks.map((link, index) => (
+                  <div key={index} className="bg-slate-800/30 rounded-2xl p-4 border border-slate-700/50">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-700/50">
+                        <i className={`${link.icon} text-slate-300`} />
+                      </div>
+                      <input
+                        type="text"
+                        value={link.name}
+                        onChange={(e) => updateLink(index, 'name', e.target.value)}
+                        className="flex-1 bg-slate-700/50 border border-slate-600 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-slate-500"
+                        placeholder="Platform name"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => updateLink(index, 'url', e.target.value)}
+                      className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-slate-500"
+                      placeholder="https://..."
+                    />
+                    <input
+                      type="text"
+                      value={link.color}
+                      onChange={(e) => updateLink(index, 'color', e.target.value)}
+                      className="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-slate-500 mt-2"
+                      placeholder="hover:text-color-400"
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex justify-center gap-3">
+                <button
+                  onClick={handleCancel}
+                  className="px-6 py-2 rounded-xl border border-slate-600 text-slate-300 hover:bg-slate-700/50 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-6 py-2 rounded-xl bg-linear-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  Confirm Changes
+                </button>
+              </div>
+            </div>
+          ) : (
+            // View Mode
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {socialLinks.map((link, index) => (
                 <a
-                  key={social.href}
-                  href={social.href}
+                  key={index}
+                  href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`w-10 h-10 rounded-xl bg-slate-800/50 flex items-center justify-center text-slate-400 transition-all duration-300 hover:bg-slate-700/50 hover:scale-110 ${social.color}`}
+                  className={`group bg-slate-800/30 rounded-2xl p-4 text-center border border-slate-700/50 transition-all duration-300 hover:bg-slate-700/50 hover:scale-105 hover:shadow-lg ${link.color}`}
                 >
-                  <i className={social.icon} />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-700/50 group-hover:bg-slate-600/50 transition-all duration-300">
+                      <i className={`${link.icon} text-xl text-slate-300 group-hover:scale-110 transition-transform duration-300`} />
+                    </div>
+                    <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors duration-300">
+                      {link.name}
+                    </span>
+                  </div>
                 </a>
               ))}
             </div>
-            <div className="relative">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full rounded-xl bg-slate-800/50 border border-slate-700 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all duration-300"
-              />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-linear-to-r from-blue-500 to-purple-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                <i className="fa-solid fa-paper-plane text-xs" />
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
-        <div className="border-t border-slate-700/50 pt-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-slate-500 text-sm">
-              <div className="flex items-center gap-2">
-                <i className="fa-regular fa-copyright text-xs" />
-                <span>{year} Royal Smart Computer. All rights reserved.</span>
-              </div>
-              <div className="hidden md:flex items-center gap-4">
-                <span className="text-slate-600">•</span>
-                <span>Made with</span>
-                <i className="fa-solid fa-heart text-rose-400 text-xs" />
-                <span>for the community</span>
-              </div>
+        {/* Edit Button */}
+        <div className="text-center">
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white transition-all duration-300 border border-slate-600"
+          >
+            <i className={`fa-solid ${isEditing ? 'fa-eye' : 'fa-pen'} text-xs`} />
+            {isEditing ? 'Preview' : 'Edit Social Links'}
+          </button>
+        </div>
+
+        {/* Footer Bottom */}
+        <div className="border-t border-slate-700/50 pt-6 mt-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+            <div className="flex items-center gap-2">
+              <i className="fa-regular fa-copyright text-xs" />
+              <span>{year} Royal Smart Computer. All rights reserved.</span>
             </div>
-            
-            <div className="flex items-center gap-6 text-sm">
-              <Link href="/privacy" className="text-slate-400 hover:text-white transition-colors duration-300 flex items-center gap-2">
-                <i className="fa-solid fa-shield text-xs" />
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-slate-400 hover:text-white transition-colors duration-300 flex items-center gap-2">
-                <i className="fa-solid fa-file-contract text-xs" />
-                Terms
-              </Link>
-              <Link href="/sitemap" className="text-slate-400 hover:text-white transition-colors duration-300 flex items-center gap-2">
-                <i className="fa-solid fa-sitemap text-xs" />
-                Sitemap
-              </Link>
+            <div className="flex items-center gap-1">
+              <span>Made with</span>
+              <span>for the community</span>
             </div>
           </div>
         </div>
