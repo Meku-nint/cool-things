@@ -24,3 +24,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err?.message || 'Server error' }, { status: 500 });
   }
 }
+
+export async function GET() {
+  try {
+    const computers = await prisma.computer.findMany({ orderBy: { createdAt: 'desc' } });
+    return NextResponse.json({ computers }, { status: 200 });
+  } catch (err: any) {
+    console.error('Error fetching computers:', err);
+    return NextResponse.json({ error: err?.message || 'Server error' }, { status: 500 });
+  }
+}

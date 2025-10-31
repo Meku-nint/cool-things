@@ -83,19 +83,72 @@ export default function DashboardPage() {
     processor: "",
   });
   const [uImages, setUImages] = useState<string[]>([]);
+  const [uFiles, setUFiles] = useState<File[]>([]);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("rsc_token") || sessionStorage.getItem("rsc_token");
     if (!token) router.replace("/login");
-    const savedItems = localStorage.getItem("rsc_items");
-    const savedOrders = localStorage.getItem("rsc_orders");
-    if (savedItems) {
-      try { setItems(JSON.parse(savedItems)); } catch {}
-    }
-    if (savedOrders) {
-      try { setOrders(JSON.parse(savedOrders)); } catch {}
-    }
+
+    // Fetch computers from the DB via the API; fall back to localStorage on error
+    (async () => {
+      try {
+        const res = await fetch('/api/computers');
+        if (res.ok) {
+          const json = await res.json();
+          const comps = json.computers || [];
+          const mapped: Computer[] = comps.map((c: any) => ({
+            id: c.id,
+            name: c.name || c.fileName || 'Unnamed',
+            price: 0,
+            negotiable: false,
+            sold: typeof c.count === 'number' ? c.count === 0 : false,
+            specs: undefined,
+            images: c.fileName ? [`/uploads/${c.fileName}`] : [],
+          }));
+          setItems(mapped);
+          try { localStorage.setItem('rsc_items', JSON.stringify(mapped)); } catch {}
+          return;
+        }
+      } catch (err) {
+        // ignore and fallback below
+      }
+
+      const savedItems = localStorage.getItem("rsc_items");
+      if (savedItems) {
+        try { setItems(JSON.parse(savedItems)); } catch {}
+      }
+    })();
+
+    // Fetch sold orders from DB
+    (async () => {
+      try {
+        const res = await fetch('/api/sold');
+        if (res.ok) {
+          const json = await res.json();
+          const solds = json.solds || [];
+          const mappedOrders: Order[] = solds.map((s: any) => ({
+            id: s.id,
+            buyerName: s.buyerName,
+            phone: s.phoneNumber,
+            model: s.computerModel,
+            price: s.salesPrice || 0,
+            specs: s.specifications || '',
+            warrantyMonths: parseInt(s.warranty || '', 10) || 0,
+          }));
+          setOrders(mappedOrders);
+          try { localStorage.setItem('rsc_orders', JSON.stringify(mappedOrders)); } catch {}
+          return;
+        }
+      } catch (err) {
+        // ignore and fallback below
+      }
+
+      const savedOrders = localStorage.getItem("rsc_orders");
+      if (savedOrders) {
+        try { setOrders(JSON.parse(savedOrders)); } catch {}
+      }
+    })();
   }, [router]);
 
   useEffect(() => {
@@ -137,41 +190,111 @@ export default function DashboardPage() {
     ));
     setEditingItem(null);
   }
-  const handleAddDevice = () => {
+  const handleAddDevice = async () => {
     if (!uName) return;
-    const specsString = [
-      uSpecs.brand && `Brand: ${uSpecs.brand}`,
-      uSpecs.ram && `RAM: ${uSpecs.ram}`,
-      uSpecs.storageType && `Storage Type: ${uSpecs.storageType}`,
-      uSpecs.storageSize && `Storage Size: ${uSpecs.storageSize}`,
-      uSpecs.processor && `Processor: ${uSpecs.processor}`,
-    ]
-      .filter(Boolean)
-      .join(" | ");
 
-    const newItem: Computer = {
-      id: `${Date.now()}`,
-      name: uName,
-      price: uPrice,
-      negotiable: uNegotiable,
-      sold: false,
-      specs: specsString,
-      images: uImages,
-    };
+    try {
+      const fd = new FormData();
+      fd.append('name', uName);
+      fd.append('price', String(uPrice));
+      fd.append('brand', uSpecs.brand || '');
+      fd.append('ram', uSpecs.ram || '');
+      fd.append('storageType', uSpecs.storageType || '');
+      fd.append('storageSize', uSpecs.storageSize || '');
+      fd.append('processor', uSpecs.processor || '');
+      fd.append('specifications', [
+        uSpecs.brand && `Brand: ${uSpecs.brand}`,
+        uSpecs.ram && `RAM: ${uSpecs.ram}`,
+        uSpecs.storageType && `Storage Type: ${uSpecs.storageType}`,
+        uSpecs.storageSize && `Storage Size: ${uSpecs.storageSize}`,
+        uSpecs.processor && `Processor: ${uSpecs.processor}`,
+      ].filter(Boolean).join(' | '));
 
-    setItems((prev: Computer[]) => [newItem, ...prev]);
-    setUName("");
-    setUPrice(0);
-    setUNegotiable(true);
-    setUSpecs({
-      brand: "",
-      ram: "",
-      storageType: "",
-      storageSize: "",
-      processor: "",
-    });
-    setUImages([]);
-    setUploadOpen(false);
+      if (uFiles && uFiles.length > 0) {
+        fd.append('file', uFiles[0]);
+      }
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: fd,
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const created = json.unsold;
+        const mapped: Computer = {
+          id: created.id,
+          name: created.pcName || uName,
+          price: Number(created.price) || uPrice || 0,
+          negotiable: uNegotiable,
+          sold: false,
+          specs: created.specifications || undefined,
+          images: created.imagePath ? [`/uploads/${created.imagePath}`] : uImages,
+        };
+
+        setItems((prev: Computer[]) => [mapped, ...prev]);
+      } else {
+        // fallback to local update if server fails
+        const specsString = [
+          uSpecs.brand && `Brand: ${uSpecs.brand}`,
+          uSpecs.ram && `RAM: ${uSpecs.ram}`,
+          uSpecs.storageType && `Storage Type: ${uSpecs.storageType}`,
+          uSpecs.storageSize && `Storage Size: ${uSpecs.storageSize}`,
+          uSpecs.processor && `Processor: ${uSpecs.processor}`,
+        ]
+          .filter(Boolean)
+          .join(' | ');
+
+        const newItem: Computer = {
+          id: `${Date.now()}`,
+          name: uName,
+          price: uPrice,
+          negotiable: uNegotiable,
+          sold: false,
+          specs: specsString,
+          images: uImages,
+        };
+
+        setItems((prev: Computer[]) => [newItem, ...prev]);
+      }
+    } catch (err) {
+      // on error fallback to local-only
+      const specsString = [
+        uSpecs.brand && `Brand: ${uSpecs.brand}`,
+        uSpecs.ram && `RAM: ${uSpecs.ram}`,
+        uSpecs.storageType && `Storage Type: ${uSpecs.storageType}`,
+        uSpecs.storageSize && `Storage Size: ${uSpecs.storageSize}`,
+        uSpecs.processor && `Processor: ${uSpecs.processor}`,
+      ]
+        .filter(Boolean)
+        .join(' | ');
+
+      const newItem: Computer = {
+        id: `${Date.now()}`,
+        name: uName,
+        price: uPrice,
+        negotiable: uNegotiable,
+        sold: false,
+        specs: specsString,
+        images: uImages,
+      };
+
+      setItems((prev: Computer[]) => [newItem, ...prev]);
+    } finally {
+      setUName("");
+      setUPrice(0);
+      setUNegotiable(true);
+      setUSpecs({
+        brand: "",
+        ram: "",
+        storageType: "",
+        storageSize: "",
+        processor: "",
+      });
+      setUImages([]);
+      setUFiles([]);
+      setUploadOpen(false);
+    }
   };
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -189,6 +312,7 @@ export default function DashboardPage() {
       )
     );
     setUImages(previews);
+    setUFiles(limited);
   };
 
   async function onImagesChange(id: string, files: FileList | null) {
@@ -591,11 +715,14 @@ export default function DashboardPage() {
               </button>
               <button
                 className="rounded-xl bg-linear-to-r from-green-500 to-emerald-600 px-6 py-3 text-white font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
-                onClick={() => {
+                onClick={async () => {
                   if (!sellId) return;
                   const item = items.find((x) => x.id === sellId);
                   if (!item) return;
+
+                  // mark locally first for instant UI feedback
                   updateItem(sellId, { sold: true, price: sellPrice, name: model });
+
                   const recHtml = `<!doctype html><html><head><meta charset="utf-8"/><title>Receipt - Royal Smart Computer</title>
                   <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:24px} h1{font-size:20px;margin:0 0 12px} .row{margin:4px 0} .muted{color:#6b7280} .box{border:1px solid #e5e7eb;padding:12px;border-radius:8px}</style>
                   </head><body>
@@ -613,20 +740,83 @@ export default function DashboardPage() {
                   </body></html>`;
                   const blob = new Blob([recHtml], { type: "text/html" });
                   const receiptUrl = URL.createObjectURL(blob);
-                  setOrders((prev) => [
-                    ...prev,
-                    {
-                      id: `${Date.now()}`,
+
+                  // Try to persist the sale to the DB via API. Fallback to local-only if it fails.
+                  try {
+                    // include imagePath if available (strip leading /uploads/ prefix)
+                    const itemImage = item.images && item.images.length > 0 ? item.images[0] : '';
+                    const imagePath = itemImage && itemImage.startsWith('/uploads/') ? itemImage.replace('/uploads/', '') : '';
+
+                    const payload = {
                       buyerName,
-                      phone,
-                      model,
-                      price: sellPrice,
-                      specs,
-                      warrantyMonths,
-                      receiptUrl,
-                    },
-                  ]);
-                  setSellId(null);
+                      phoneNumber: phone,
+                      computerModel: model,
+                      salesPrice: sellPrice,
+                      specifications: specs,
+                      warranty: String(warrantyMonths),
+                      imagePath,
+                    };
+
+                    console.log('Posting sale payload', payload);
+                    const res = await fetch('/api/sold', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(payload),
+                    });
+
+                    let json: any = null;
+                    try { json = await res.json(); } catch (e) { console.error('Failed to parse /api/sold response', e); }
+
+                    if (res.ok) {
+                      const created = json?.sold;
+                      console.log('Sold created', created);
+                      setOrders((prev) => [
+                        ...prev,
+                        {
+                          id: created.id,
+                          buyerName: created.buyerName,
+                          phone: created.phoneNumber,
+                          model: created.computerModel,
+                          price: created.salesPrice || sellPrice,
+                          specs: created.specifications || specs,
+                          warrantyMonths: parseInt(created.warranty || '', 10) || warrantyMonths,
+                          receiptUrl,
+                        },
+                      ]);
+                    } else {
+                      // server returned error - fallback to local
+                      setOrders((prev) => [
+                        ...prev,
+                        {
+                          id: `${Date.now()}`,
+                          buyerName,
+                          phone,
+                          model,
+                          price: sellPrice,
+                          specs,
+                          warrantyMonths,
+                          receiptUrl,
+                        },
+                      ]);
+                    }
+                  } catch (err) {
+                    // network or other error - fallback to local
+                    setOrders((prev) => [
+                      ...prev,
+                      {
+                        id: `${Date.now()}`,
+                        buyerName,
+                        phone,
+                        model,
+                        price: sellPrice,
+                        specs,
+                        warrantyMonths,
+                        receiptUrl,
+                      },
+                    ]);
+                  } finally {
+                    setSellId(null);
+                  }
                 }}
               >
                 <i className="fa-solid fa-check mr-2" />

@@ -19,10 +19,35 @@ export default function SoldPage() {
   const [mode, setMode] = useState<"sold" | "all">("sold");
 
   useEffect(() => {
-    const saved = localStorage.getItem("rsc_items");
-    if (saved) {
-      try { setItems(JSON.parse(saved)); } catch {}
-    }
+    // Try to load sold records from the server (Prisma-backed /api/sold)
+    (async () => {
+      try {
+        const res = await fetch('/api/sold');
+        if (res.ok) {
+          const json = await res.json();
+          const solds = json.solds || [];
+          const mapped = solds.map((s: any) => ({
+            id: s.id,
+            name: s.computerModel || s.buyerName || 'Sold item',
+            price: typeof s.salesPrice === 'number' ? s.salesPrice : parseInt(s.salesPrice, 10) || 0,
+            negotiable: false,
+            sold: true,
+            specs: s.specifications || '',
+            images: s.imagePath ? [`/uploads/${s.imagePath}`] : [],
+          }));
+          setItems(mapped);
+          try { localStorage.setItem('rsc_items', JSON.stringify(mapped)); } catch {}
+          return;
+        }
+      } catch (err) {
+        // ignore and fallback to localStorage below
+      }
+
+      const saved = localStorage.getItem("rsc_items");
+      if (saved) {
+        try { setItems(JSON.parse(saved)); } catch {}
+      }
+    })();
   }, []);
 
   const list = useMemo(() => {

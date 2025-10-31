@@ -48,6 +48,7 @@ model Sold {
   phoneNumber     String   @db.VarChar(20)
   computerModel   String   @db.VarChar(255)
   salesPrice      Int
+  imagePath       String?  @db.VarChar(255)
   specifications  String   @db.VarChar(255)
   warranty        String   @db.VarChar(255)
   createdAt       DateTime @default(now())
