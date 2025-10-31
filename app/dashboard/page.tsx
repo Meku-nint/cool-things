@@ -736,9 +736,31 @@ export default function DashboardPage() {
 
                   // Try to persist the sale to the DB via API. Fallback to local-only if it fails.
                   try {
-                    // include imagePath if available (strip leading /uploads/ prefix)
-                    const itemImage = item.images && item.images.length > 0 ? item.images[0] : '';
-                    const imagePath = itemImage && itemImage.startsWith('/uploads/') ? itemImage.replace('/uploads/', '') : '';
+                    // include imagePath if available. If image is a data URL, upload it first to get a filename.
+                    let itemImage = item.images && item.images.length > 0 ? item.images[0] : '';
+                    let imagePath = '';
+                    if (itemImage) {
+                      if (itemImage.startsWith('/uploads/')) {
+                        imagePath = itemImage.replace('/uploads/', '');
+                      } else if (itemImage.startsWith('data:')) {
+                        // upload data URL to server to persist and get filename
+                        try {
+                          const blob = await (await fetch(itemImage)).blob();
+                          const form = new FormData();
+                          // give a default filename
+                          const ext = blob.type.split('/')[1] || 'png';
+                          const fileName = `sale_image.${ext}`;
+                          form.append('file', new File([blob], fileName, { type: blob.type }));
+                          const up = await fetch('/api/upload-image', { method: 'POST', body: form });
+                          if (up.ok) {
+                            const upJson = await up.json();
+                            imagePath = upJson.fileName || '';
+                          }
+                        } catch (e) {
+                          console.error('Failed to upload inline image for sold item', e);
+                        }
+                      }
+                    }
 
                     const payload = {
                       buyerName,
