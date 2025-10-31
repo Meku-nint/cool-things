@@ -32,13 +32,10 @@ export default function UploadComputer() {
       setLoading(false);
     }
   }
-
-  // Automatically submit when a file is selected
   async function onFileChange() {
     const input = fileRef.current;
     if (!input || !input.files || input.files.length === 0) return;
     const file = input.files[0];
-    // send file and metadata to the server; server will save the file locally and record metadata to DB
     await postData({ name: name || undefined, count, file });
   }
 
