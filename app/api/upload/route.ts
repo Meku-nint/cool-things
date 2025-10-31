@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
-import prisma from '../../../../lib/prisma';
+import prisma from '../../../lib/prisma';
 
 export const runtime = 'node';
 
