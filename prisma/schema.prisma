@@ -32,6 +32,10 @@ model Admin {
 model Unsold {
   id            String @id @default(uuid())
   pcName        String @db.VarChar(255)
+  ram           String @db.VarChar(255)
+  storageType   String @db.VarChar(255)
+  storageSize   String @db.VarChar(255)
+  processor     String @db.VarChar(255)
   brand         String @db.VarChar(255)
   price         String @db.VarChar(255)
   specifications String @db.VarChar(255)
