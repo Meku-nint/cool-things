@@ -1,11 +1,10 @@
 "use client";
 
-import Navbar from "../components/Navbar";
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
 import Head from "next/head";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 
 type Computer = {
   id: string;
@@ -73,7 +72,7 @@ export default function DashboardPage() {
   const [warrantyMonths, setWarrantyMonths] = useState<number>(12);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uName, setUName] = useState("");
-  const [uPrice, setUPrice] = useState<number>(0);
+  const [uPrice, setUPrice] = useState<string|number>("");
   const [uNegotiable, setUNegotiable] = useState(true);
   const [uSpecs, setUSpecs] = useState({
     brand: "",
@@ -446,11 +445,8 @@ export default function DashboardPage() {
                       )}
                     </div>
                   </div>
-
-                  {/* Details Section */}
                   <div className="lg:w-2/3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Device Name */}
                       <div className="space-y-2">
                         <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
                           <i className="fa-regular fa-tag mr-1" />
@@ -465,7 +461,6 @@ export default function DashboardPage() {
                         />
                       </div>
 
-                      {/* Price */}
                       <div className="space-y-2">
                         <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
                           <i className="fa-regular fa-dollar-sign mr-1" />
@@ -485,8 +480,6 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Negotiable */}
                       <div className="flex items-center gap-3 md:col-span-2">
                         <div className="relative">
                           <input
@@ -828,31 +821,17 @@ export default function DashboardPage() {
       )}
       {uploadOpen && (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl animate-fadeIn">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between sticky top-0 bg-white">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-blue-100 to-blue-200">
-              <i className="fa-solid fa-plus text-blue-600 text-lg" />
-            </div>
-            <div>
-              <h4 className="text-xl font-semibold text-slate-800">
-                Add New Device
-              </h4>
-              <p className="text-sm text-slate-500">Enter device details</p>
-            </div>
-          </div>
+      <div className="w-full mt-80 max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl animate-fadeIn">
+        <div className="mb-6 flex items-left justify-end  top-0 bg-white">
+         
           <button
-            className="text-slate-400 hover:text-slate-600 transition-colors duration-200"
+            className="  transition-colors duration-200 hover:cursor-pointer"
             onClick={() => setUploadOpen(false)}
           >
             <i className="fa-solid fa-xmark text-xl" />
           </button>
         </div>
-
-        {/* Form */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {/* Device name */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">
               Device Name
@@ -870,11 +849,15 @@ export default function DashboardPage() {
             </label>
             <input
               type="number"
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 focus:border-blue-400 appearance-none focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none appearance-none"
               value={uPrice}
-              onChange={(e) => setUPrice(Number(e.target.value) || 0)}
+onChange={(e) => {
+  const value = e.target.value;
+  setUPrice(value === "" ? "" : Number(value));
+}}              
             />
           </div>
+          
           <div className="flex items-center gap-3 md:col-span-2">
             <input
               id="u-neg"
